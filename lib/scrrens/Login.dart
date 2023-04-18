@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:task/Utils/Resource.dart';
 import 'package:task/scrrens/Registration.dart';
 
 import '../Utils/Authentication.dart';
+import '../Utils/utils.dart';
 import 'Home.dart';
 
 class Login extends StatefulWidget {
@@ -35,97 +37,64 @@ class _LoginState extends State<Login> {
   loginWithEmailAndPassword() async {
     String email = emailController.text;
     String password = passwordController.text;
-    UserCredential? user = await Authentication.loginUserWithEmailAndPassword(email, password);
-    if(user!=null)
-    {
-      Fluttertoast.showToast(
-          msg: "Login successfully",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
+    Resource<User>? user = await Authentication.loginUserWithEmailAndPassword(email, password);
+    if(user!=null){
+      if(user.status == ResourceStatus.Success){
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    Home()));
+      }
 
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  Home()));
+      Utils.showToastMessage(user.message, Toast.LENGTH_SHORT);
+
     }
     else{
-      Fluttertoast.showToast(
-          msg: "Couldn't able to login",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
+
+      Utils.showToastMessage(Resource.SOMETHING_WENT_WRONG, Toast.LENGTH_SHORT);
+
     }
   }
   googleLogin(BuildContext context) async{
-    User? user = await Authentication.signInWithGoogle(context: context);
+    Resource<User>? user  = await Authentication.signInWithGoogle(context: context);
     if(user!=null){
-      Fluttertoast.showToast(
-          msg: "Successfully login with google",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  Home()));
+      if(user.status == ResourceStatus.Success){
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    Home()));
+      }
+      Utils.showToastMessage(user.message, Toast.LENGTH_SHORT);
+
     }
     else{
-      Fluttertoast.showToast(
-          msg: "Couldn't able to login with google",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
+
+      Utils.showToastMessage(Resource.SOMETHING_WENT_WRONG, Toast.LENGTH_SHORT);
+
     }
   }
 
   facebookLogin(BuildContext context) async{
-    UserCredential user = await Authentication.signInWithFacebook();
+    Resource<User>? user = await Authentication.signInWithFacebook();
 
     if(user!=null){
-      Fluttertoast.showToast(
-          msg: "Successfully login with facebook",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  Home()));
+      if(user.status == ResourceStatus.Success){
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    Home()));
+      }
+
+      Utils.showToastMessage(user.message, Toast.LENGTH_SHORT);
+
     }
     else{
-      Fluttertoast.showToast(
-          msg: "Couldn't able to login with facebook",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
+
+      Utils.showToastMessage(Resource.SOMETHING_WENT_WRONG, Toast.LENGTH_SHORT);
+
     }
   }
   @override
@@ -158,6 +127,8 @@ class _LoginState extends State<Login> {
                       child: Column(
                         children: [
                           TextFormField(
+
+                            autovalidateMode: AutovalidateMode.always,
                             controller: emailController,
                             decoration: const InputDecoration(
                                 hintText: "Email Id : ",
@@ -172,6 +143,8 @@ class _LoginState extends State<Login> {
                           ),
                           SizedBox(height: 20,),
                           TextFormField(
+                            autovalidateMode: AutovalidateMode.always,
+
                             controller: passwordController,
                             decoration: const InputDecoration(
                                 hintText: "Password : ",
@@ -188,7 +161,7 @@ class _LoginState extends State<Login> {
                       ),
                     ),
 
-                    SizedBox(height: 30,),
+                    const SizedBox(height: 30,),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(

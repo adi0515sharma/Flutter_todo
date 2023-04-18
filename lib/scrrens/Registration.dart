@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:task/Utils/Authentication.dart';
+import 'package:task/Utils/Resource.dart';
+import 'package:task/Utils/utils.dart';
 
 import 'Home.dart';
 import 'Login.dart';
@@ -19,12 +21,12 @@ class _RegistrationState extends State<Registration> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  String _password = "";
 
   @override
   initState() {
     super.initState();
     // Add listeners to this class
-    print("registration page called");
   }
 
   _launchURL() {
@@ -38,35 +40,20 @@ class _RegistrationState extends State<Registration> {
   regiseterWithEmailAndPassword() async{
     String email = emailController.text;
     String password = passwordController.text;
-    UserCredential? user = await Authentication.createUserWithEmailAndPassword(email, password);
+    Resource<User>? user = await Authentication.createUserWithEmailAndPassword(email, password);
     if(user!=null)
     {
-      Fluttertoast.showToast(
-          msg: "Register successfully",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
-
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  Home()));
+      if(user.status == ResourceStatus.Success){
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    Home()));
+      }
+      Utils.showToastMessage(user.message, Toast.LENGTH_SHORT);
     }
     else{
-      Fluttertoast.showToast(
-          msg: "Couldn't able to register",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
+      Utils.showToastMessage(Resource.SOMETHING_WENT_WRONG, Toast.LENGTH_SHORT);
     }
   }
 
@@ -76,19 +63,19 @@ class _RegistrationState extends State<Registration> {
       body: SingleChildScrollView(
           child: Container(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(10, 30, 10, 0),
+          padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 40,
               ),
               Text("Sign Up",
                   style: GoogleFonts.poppins(
                       color: Colors.black,
                       fontWeight: FontWeight.w500,
-                      textStyle: TextStyle(fontSize: 23))),
-              SizedBox(
+                      textStyle: const TextStyle(fontSize: 23))),
+              const SizedBox(
                 height: 20,
               ),
               Form(
@@ -97,8 +84,8 @@ class _RegistrationState extends State<Registration> {
                 children: [
                   TextFormField(
                     controller: emailController,
-                    decoration: const InputDecoration(
-                        hintText: "Email Id : ", border: OutlineInputBorder()),
+                    autovalidateMode: AutovalidateMode.always,
+                    decoration: const InputDecoration(hintText: "Email Id : ", border: OutlineInputBorder()),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter email id';
@@ -106,11 +93,13 @@ class _RegistrationState extends State<Registration> {
                       return null;
                     },
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
                     obscureText: true,
+                    onChanged: (value) => _password = value,
+                    autovalidateMode: AutovalidateMode.always,
                     controller: passwordController,
                     decoration: const InputDecoration(
                         hintText: "Password : ", border: OutlineInputBorder()),
@@ -121,16 +110,22 @@ class _RegistrationState extends State<Registration> {
                       return null;
                     },
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
-                    decoration: InputDecoration(
+
+                    autovalidateMode: AutovalidateMode.always,
+                    obscureText: true,
+                    decoration: const InputDecoration(
                         hintText: "Confirm Password : ",
                         border: OutlineInputBorder()),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter confirm password';
+                      }
+                      else if(value != _password){
+                        return 'Confirm password not matching with password';
                       }
                       return null;
                     },
@@ -138,7 +133,7 @@ class _RegistrationState extends State<Registration> {
                 ],
               )),
 
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
               SizedBox(
@@ -155,21 +150,21 @@ class _RegistrationState extends State<Registration> {
                         style: GoogleFonts.poppins(
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
-                            textStyle: TextStyle(fontSize: 18))),
+                            textStyle: const TextStyle(fontSize: 18))),
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               RichText(
                   text: TextSpan(children: [
-                TextSpan(
+                const TextSpan(
                     text: "already have account ? ",
                     style: TextStyle(color: Colors.black)),
                 TextSpan(
                   text: "SignIn here",
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.blue, decoration: TextDecoration.underline),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
